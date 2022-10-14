@@ -1,0 +1,1 @@
+lm75.o: lm75.c ../general.h i2c/i2c.h i2c/../../general.h lm75.h

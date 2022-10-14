@@ -1,6 +1,7 @@
 NAME		= dhry
 TARGET		= dhry
 LD_RAMROM	= ROM
+PROGRAM_MK  	= true
 DEBUG		= 1
 # Optimization setting
 # (-Os for small code size, -O2 for speed)
@@ -33,13 +34,24 @@ TARGET_MODE	= arm
 CPU_VARIANT	= LPC2104
 #CPU		= arm926ej-s
 CPU		= arm7tdmi
-OPTS		= -mcpu=$(CPU)
-LD_SCRIPT	= link_16k_128k_rom.ld
-LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
-			-Wl,-Map=$(NAME).map,--cref -Wl,--gc-sections -lnosys -nostartfiles
+OPTS		= -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -mfloat-abi=softfp
 
-CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -flto -ffunction-sections -fdata-sections -fno-builtin -D MSC_CLOCK
-CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS)
+#----------------------------------------------------------------------
+# COMPILER AND ASSEMBLER OPTIONS
+#----------------------------------------------------------------------
+W_OPTS    = -Wall -Wcast-align -Wcast-qual -Wimplicit \
+            -Wnested-externs -Wpointer-arith -Wswitch \
+            -Wreturn-type \
+                        -Wformat -Wformat-security\
+                        -Werror -Wextra -pedantic
+
+LD_SCRIPT	= link_16k_128k_rom.ld
+LD_FLAGS	= -Wl,--gc-sections -lnosys -nostartfiles
+LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
+			-Wl,-Map=$(NAME).map,--cref
+
+CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -D MSC_CLOCK #-flto -ffunction-sections -fdata-sections -fno-builtin
+CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS) #$(W_OPTS)
 CC_OPTS_A	= $(CA_OPTS)
 
 #----------------------------------------------------------------------
@@ -47,13 +59,15 @@ CC_OPTS_A	= $(CA_OPTS)
 #----------------------------------------------------------------------
 OBJS ?= $(CSRCS:.c=.o) $(ASRCS:.S=.o)
 
+all: $(TARGET) codesize
+
 %.o: %.c
 	$(CC) -c $(CC_OPTS) -o $@ $<
 %.o: %.S
 	$(AS) -c $(CC_OPTS_A) -o $@ $<
 
 clean:
-	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst)
+	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst) $(NAME).elf
 
 $(TARGET): $(OBJS) $(LIBS)
 	$(LD) $(OBJS) $(LIBS) $(INC) $(LD_OPTS)
@@ -96,6 +110,10 @@ ifeq (true, $(PROGRAM_MK))
 	@$(SIZE) $(NAME).elf \
 	| $(AWK) 'NR > 1 { printf "%7d %7d %7d %7d %7d %s\n", \
 			   $$1,$$2,$$3,$$1+$$2,$$2+$$3,"$(NAME).elf" }'
+	@$(SIZE) $(NAME).elf \
+        | $(AWK) 'NR > 1 { printf "%7x %7x %7x %7x %7x %s\n", \
+                           $$1,$$2,$$3,$$1+$$2,$$2+$$3,"$(NAME).elf" }'
+
 	@echo ""
 ifeq (RAM, $(LD_RAMROM))
 	@echo "                          |===========|"

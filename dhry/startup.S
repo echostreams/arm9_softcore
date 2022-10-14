@@ -138,41 +138,9 @@ fiqHandlerAddress:
 # Reset Handler
 handleReset:
 
-#if (USE_PLL == 1)
-                LDR     R0, =PLL_BASE
-                MOV     R1, #0xAA
-                MOV     R2, #0x55
-
-# Disable PLL before programming (in case it was enabled before)
-                MOV     R3, #0
-                STR     R3, [R0, #PLLCON_OFS]
-                STR     R1, [R0, #PLLFEED_OFS]
-                STR     R2, [R0, #PLLFEED_OFS]
-
-# Wait for
-# Configure and Enable PLL
-                MOV     R3, #VAL_PLLCFG
-                STR     R3, [R0, #PLLCFG_OFS]
-                MOV     R3, #PLLCON_PLLE
-                STR     R3, [R0, #PLLCON_OFS]
-                STR     R1, [R0, #PLLFEED_OFS]
-                STR     R2, [R0, #PLLFEED_OFS]
-
-# Wait until PLL Locked
-PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
-                ANDS    R3, R3, #PLLSTAT_PLOCK
-                BEQ     PLL_Loop
-
-# Switch to PLL Clock
-                MOV     R3, #(PLLCON_PLLE | PLLCON_PLLC)
-                STR     R3, [R0, #PLLCON_OFS]
-                STR     R1, [R0, #PLLFEED_OFS]
-                STR     R2, [R0, #PLLFEED_OFS]
-#endif
-
-
 # Setup Stack for each mode
-                LDR     R0, =stackTop
+                //LDR     R0, =stackTop
+		LDR	R0, =_estack
 
 #  Enter Undefined Instruction Mode and set its Stack Pointer
                 MSR     CPSR_c, #Mode_UND|I_Bit|F_Bit
@@ -225,8 +193,10 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
 #  Call low-level initialization
                 BL      lowLevelInit
 
-# Relocate .data section (Copy from ROM to RAM)
+# Initialize exception vectors
+                BL      exceptionHandlerInit
 
+# Relocate .data section (Copy from ROM to RAM)
                 LDR     R1, =_etext
                 LDR     R2, =_data
                 LDR     R3, =_edata
@@ -242,9 +212,6 @@ LoopRel:        CMP     R2, R3
 LoopZI:         CMP     R1, R2
                 STRLO   R0, [R1], #4
                 BLO     LoopZI
-
-# Initialize exception vectors
-                BL      exceptionHandlerInit
 
 # Enter the C code
 Jump_To_Main:

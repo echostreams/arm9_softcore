@@ -19,6 +19,9 @@
 #include <stdlib.h>
 #include "dhry.h"
 
+//extern int _HEAP_START;
+extern int _end;
+
 /* Global Variables: */
 
 Rec_Pointer     Ptr_Glob,
@@ -180,20 +183,39 @@ int main (int argc, char **argv)
   REG int         Run_Index;
   REG int         Number_Of_Runs;
 
+  //int i;
+  (void)argc;
+  (void)argv;
+
   /* Initializations */
 
   //printf("DHRYSTONE TEST\n");
   //printf("sizeof(Rec_Type): %d\n", sizeof(Rec_Type));
+  //printf("_HEAP_START: %p\n", &_HEAP_START);
+  printf("       _end: %p\n", (void*)&_end);
 
   Next_Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
   Ptr_Glob = (Rec_Pointer) malloc (sizeof (Rec_Type));
+  memset(Next_Ptr_Glob, 0, sizeof(Rec_Type));
+  memset(Ptr_Glob, 0, sizeof(Rec_Type));
+
+  //printf("Next_Ptr_Glob: %x\n", Next_Ptr_Glob);
+  //printf("     Ptr_Glob: %x\n", Ptr_Glob);
 
   Ptr_Glob->Ptr_Comp                    = Next_Ptr_Glob;
   Ptr_Glob->Discr                       = Ident_1;
   Ptr_Glob->variant.var_1.Enum_Comp     = Ident_3;
   Ptr_Glob->variant.var_1.Int_Comp      = 40;
   strcpy (Ptr_Glob->variant.var_1.Str_Comp,
-          "DHRYSTONE PROGRAM, SOME STRING");
+         "DHRYSTONE PROGRAM, SOME STRING");
+  //printf("Ptr_Glob->variant.var_1.Str_Comp: %x\n", &Ptr_Glob->variant.var_1.Str_Comp[0]);
+
+  //for (i = 0; i < 31; i++) {
+  //	printf(" %02x", Ptr_Glob->variant.var_1.Str_Comp[i]);
+  //}
+  //printf("\n");
+  //printf("Ptr_Glob->variant.var_1.Str_Comp: %s\n", &Ptr_Glob->variant.var_1.Str_Comp[0]);
+
   strcpy (Str_1_Loc, "DHRYSTONE PROGRAM, 1'ST STRING");
 
   Arr_2_Glob [8][7] = 10;
@@ -218,7 +240,7 @@ int main (int argc, char **argv)
   printf ("Please give the number of runs through the benchmark: ");
   {
     int n;
-    n = 6000;//scanf ("%d", &n);
+    n = 2000;//scanf ("%d", &n);
     Number_Of_Runs = n;
   }
   printf ("\n");
@@ -241,14 +263,14 @@ int main (int argc, char **argv)
 #endif
 
 
-#if 0
   for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index)
   {
+    if (Run_Index % 500 == 0)
+      printf("Run Index: %d\n", Run_Index);
 
-	printf("Run Index: %d\n", Run_Index);
+    Proc_5();
+    Proc_4();
 
-    //Proc_5();
-    //Proc_4();
       /* Ch_1_Glob == 'A', Ch_2_Glob == 'B', Bool_Glob == true */
     Int_1_Loc = 2;
     Int_2_Loc = 3;
@@ -265,16 +287,16 @@ int main (int argc, char **argv)
       Int_1_Loc += 1;
     } /* while */
       /* Int_1_Loc == 3, Int_2_Loc == 3, Int_3_Loc == 7 */
-    //Proc_8 (Arr_1_Glob, Arr_2_Glob, Int_1_Loc, Int_3_Loc);
+    Proc_8 (Arr_1_Glob, Arr_2_Glob, Int_1_Loc, Int_3_Loc);
       /* Int_Glob == 5 */
-    //Proc_1 (Ptr_Glob);
+    Proc_1 (Ptr_Glob);
     for (Ch_Index = 'A'; Ch_Index <= Ch_2_Glob; ++Ch_Index)
                              /* loop body executed twice */
     {
       if (Enum_Loc == Func_1 (Ch_Index, 'C'))
          /* then, not executed */
       {
-        //Proc_6 (Ident_1, &Enum_Loc);
+        Proc_6 (Ident_1, &Enum_Loc);
         strcpy (Str_2_Loc, "DHRYSTONE PROGRAM, 3'RD STRING");
         Int_2_Loc = Run_Index;
         Int_Glob = Run_Index;
@@ -285,7 +307,7 @@ int main (int argc, char **argv)
     Int_1_Loc = Int_2_Loc / Int_3_Loc;
     Int_2_Loc = 7 * (Int_2_Loc - Int_3_Loc) - Int_1_Loc;
       /* Int_1_Loc == 1, Int_2_Loc == 13, Int_3_Loc == 7 */
-    //Proc_2 (&Int_1_Loc);
+    Proc_2 (&Int_1_Loc);
       /* Int_1_Loc == 5 */
 
   } /* loop "for Run_Index" */
@@ -293,7 +315,6 @@ int main (int argc, char **argv)
   /**************/
   /* Stop timer */
   /**************/
-#endif
 
 #ifdef TIMES
   times (&time_info);
@@ -324,7 +345,7 @@ int main (int argc, char **argv)
 
   printf ("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
   printf ("        should be:   Number_Of_Runs + 10\n");
-return 0;
+
   printf ("Ptr_Glob->\n");
   printf ("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
   printf ("        should be:   (implementation-dependent)\n");
@@ -364,6 +385,8 @@ return 0;
 
   User_Time = End_Time - Begin_Time;
 
+  printf("Time: %ld %ld %d\n", Begin_Time, End_Time, Too_Small_Time);
+
   if (User_Time < Too_Small_Time)
   {
     printf ("Measured time too small to obtain meaningful results\n");
@@ -383,8 +406,10 @@ return 0;
                         / (float) User_Time;
 #endif
     printf ("Microseconds for one run through Dhrystone: ");
-    printf ("%6.1f \n", Microseconds);
+    printf ("%d\n", (int)Microseconds);
+    printf ("%6.1f \n",  Microseconds);
     printf ("Dhrystones per Second:                      ");
+    printf ("%d\n", (int)Dhrystones_Per_Second);
     printf ("%6.1f \n", Dhrystones_Per_Second);
     printf ("\n");
   }

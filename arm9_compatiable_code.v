@@ -18,8 +18,8 @@ module arm9_compatiable_code(
           ram_wdata,
           ram_wen,
           rom_addr,
-          rom_en 
-        ); 
+          rom_en
+        );
 
 
 input            clk;
@@ -28,40 +28,40 @@ input            cpu_restart;
 input            fiq;
 input            irq;
 input            ram_abort;
-input  [31:0]     ram_rdata;
+input  [31:0]    ram_rdata;
 input            rom_abort;
-input  [31:0]     rom_data;
+input  [31:0]    rom_data;
 input            rst;
 
 
-output [31:0]     ram_addr;
+output [31:0]    ram_addr;
 output           ram_cen;
 output [3:0]     ram_flag;
-output [31:0]     ram_wdata;
+output [31:0]    ram_wdata;
 output           ram_wen;
-output [31:0]     rom_addr;
+output [31:0]    rom_addr;
 output           rom_en;
 
 
 /******************************************************/
 //register definition area
 /******************************************************/
-reg    [31:0]     add_b;
+reg    [31:0]    add_b;
 reg              add_c;
 reg              all_code;
 reg    [3:0]     cha_num;
 reg              cha_vld;
-reg    [31:0]     cmd;
-reg    [31:0]     cmd_addr;
+reg    [31:0]    cmd;
+reg    [31:0]    cmd_addr;
 reg              cmd_flag;
 reg              code_abort;
 reg              code_flag;
-reg    [31:0]     code_rm;
-reg    [31:0]     code_rma;
+reg    [31:0]    code_rm;
+reg    [31:0]    code_rma;
 reg    [4:0]     code_rot_num;
-reg    [31:0]     code_rs;
+reg    [31:0]    code_rs;
 reg    [2:0]     code_rs_flag;
-reg    [31:0]     code_rsa;
+reg    [31:0]    code_rsa;
 reg              code_und;
 reg              cond_satisfy;
 reg              cpsr_c;
@@ -71,9 +71,9 @@ reg    [4:0]     cpsr_m;
 reg              cpsr_n;
 reg              cpsr_v;
 reg              cpsr_z;
-reg    [31:0]     dp_ans;
+reg    [31:0]    dp_ans;
 reg              fiq_flag;
-reg    [31:0]     go_data;
+reg    [31:0]    go_data;
 reg    [5:0]     go_fmt;
 reg    [3:0]     go_num;
 reg              go_vld;
@@ -100,7 +100,7 @@ reg    [31:0]     r9_fiq;
 reg    [31:0]     r9_usr;
 reg    [31:0]     ra_fiq;
 reg    [31:0]     ra_usr;
-reg    [3:0]     ram_flag;
+reg    [3:0]      ram_flag;
 reg    [31:0]     ram_wdata;
 reg    [31:0]     rb_fiq;
 reg    [31:0]     rb_usr;
@@ -246,7 +246,7 @@ wire             wait_en;
 /******************************************************/
 //wire statement area
 /******************************************************/
-assign add_a =  rn;	
+assign add_a =  rn;
 
 assign and_ans =  rnb & sec_operand;
 
@@ -254,7 +254,7 @@ assign bic_ans =  rnb & ~sec_operand;
 
 assign bit_cy =  high_middle[1];
 
-assign bit_ov =  high_middle[1] ^ sum_middle[31];	
+assign bit_ov =  high_middle[1] ^ sum_middle[31];
 
 assign cha_rf_vld =  cha_vld & ( cha_num==4'hf );
 
@@ -460,7 +460,7 @@ else if ( cmd_is_multl )
 else if ( cmd_is_multlx )
     add_c =  multl_extra_num;
 else if ( cmd_is_dp0|cmd_is_dp1|cmd_is_dp2 )
-    if ( (cmd[24:21]==4'b0101)|(cmd[24:21]==4'b0110)|(cmd[24:21]==4'b0111) )    
+    if ( (cmd[24:21]==4'b0101)|(cmd[24:21]==4'b0110)|(cmd[24:21]==4'b0111) )
         add_c =  cpsr_c;
 	else if ( (cmd[24:21]==4'b0010)|(cmd[24:21]==4'b0011)|(cmd[24:21]==4'b1010) )
 	    add_c =  1'b1;
@@ -523,11 +523,11 @@ else if ( code[27:25]==3'b101 )
     all_code =  1'b1;
 else if ( code[27:25]==3'b111 )
     all_code =  code[24];
-else 
-    all_code =  1'b0;	
+else
+    all_code =  1'b0;
 
 always @ ( * )
-cha_num =  cmd[15:12];		
+cha_num =  cmd[15:12];
 
 always @ ( * )
 if ( cmd_ok )
@@ -546,7 +546,7 @@ else if ( cpu_en )
 		cmd[15:12] <= #`DEL cmd[3:0];
 		end
 	else if ( cmd_is_multl )
-	    cmd[27:25] <= #`DEL 3'b110;	   
+	    cmd[27:25] <= #`DEL 3'b110;
     else if ( cmd_is_ldm ) begin
 	    cmd[0] <= #`DEL 1'b0;
 		cmd[1] <= #`DEL cmd[0] ? cmd[1] : 1'b0;
@@ -746,7 +746,7 @@ else if ( cpu_en )
         if ( cmd_is_msr0|cmd_is_msr1 )
 		    if ( ~cmd[22] & cmd[19] )
                 cpsr_c <= #`DEL  sec_operand[29];
-			else;	
+			else;
         else if ( cmd_is_dp0|cmd_is_dp1|cmd_is_dp2 )
             if ( cmd[20] )
                 if ( cmd[15:12]==4'hf )

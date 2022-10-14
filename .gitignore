@@ -1,0 +1,5 @@
+test.vcd
+*.a
+*.o
+a.out
+

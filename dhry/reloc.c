@@ -4,6 +4,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+extern long timeval;
+
+clock_t clock(void) {
+  return timeval;
+}
+
+void _clock_init(void) {
+  timeval = 0;
+}
+
 #define CR     0x0D
 
 /* registers for user-defined behavior rule */
@@ -45,6 +55,7 @@ caddr_t _sbrk(int incr) {
   prev_heap = heap;
 
   heap += incr;
+  //printf("heap: %x\n", heap);
 
   return (caddr_t) prev_heap;
 }

@@ -45,13 +45,13 @@ void Proc_6 (Enumeration Enum_Val_Par, Enumeration *Enum_Ref_Par)
     case Ident_2:
       if (Int_Glob > 100)
         *Enum_Ref_Par = Ident_1;
-      else 
+      else
         *Enum_Ref_Par = Ident_4;
       break;
     case Ident_3: /* executed */
       *Enum_Ref_Par = Ident_2;
        break;
-    case Ident_4: 
+    case Ident_4:
        break;
     case Ident_5:
        *Enum_Ref_Par = Ident_3;
@@ -60,8 +60,8 @@ void Proc_6 (Enumeration Enum_Val_Par, Enumeration *Enum_Ref_Par)
 } /* Proc_6 */
 
 
-void Proc_7 (One_Fifty Int_1_Par_Val, 
-             One_Fifty Int_2_Par_Val, 
+void Proc_7 (One_Fifty Int_1_Par_Val,
+             One_Fifty Int_2_Par_Val,
              One_Fifty *Int_Par_Ref )
 /**********************************************/
     /* executed three times                                      */
@@ -79,9 +79,9 @@ void Proc_7 (One_Fifty Int_1_Par_Val,
 } /* Proc_7 */
 
 
-void Proc_8 (Arr_1_Dim Arr_1_Par_Ref, 
-             Arr_2_Dim Arr_2_Par_Ref, 
-             int Int_1_Par_Val, 
+void Proc_8 (Arr_1_Dim Arr_1_Par_Ref,
+             Arr_2_Dim Arr_2_Par_Ref,
+             int Int_1_Par_Val,
              int Int_2_Par_Val)
 /*********************************************************************/
     /* executed once      */
@@ -92,6 +92,9 @@ void Proc_8 (Arr_1_Dim Arr_1_Par_Ref,
   REG One_Fifty Int_Loc;
 
   Int_Loc = Int_1_Par_Val + 5;
+
+  //printf("Int_Loc: %d\n", Int_Loc);
+
   Arr_1_Par_Ref [Int_Loc] = Int_2_Par_Val;
   Arr_1_Par_Ref [Int_Loc+1] = Arr_1_Par_Ref [Int_Loc];
   Arr_1_Par_Ref [Int_Loc+30] = Int_Loc;

@@ -6,6 +6,8 @@ module tb;
 //parameter BINFILE = "./DHRY.bin";
 //parameter BINFILE = "./hello/hello";
 parameter BINFILE = "./dhry/dhry";
+//parameter BINFILE = "./testcode/MiniDemo2148.bin";
+//parameter BINFILE = "./lpc2104/hello.bin";
 
 reg clk = 1'b0;
 always clk = #500 ~clk; //1MHz
@@ -30,8 +32,8 @@ initial begin
     $fdisplay(fd, "%2h%2h%2h%2h%1s", rom[4*i+3], rom[4*i+2], rom[4*i+1], rom[4*i], (i==8191)?";":",");
   $fclose(fd);
 
-	//$dumpfile("test.vcd");
-	//$dumpvars(0);
+	$dumpfile("test.vcd");
+	$dumpvars(0);
 
 end
 
@@ -51,11 +53,14 @@ wire [31:0] ram_addr;
 wire [31:0] ram_wdata;
 
 //16k RAM
-//reg [31:0] ram [4095:0];
-//32k RAM
-reg [31:0] ram [8191:0];
+reg [31:0] ram [4095:0];
 
 reg [31:0] ram_rdata;
+
+initial begin
+  for(i=0;i<4096;i=i+1)
+      ram[i] = 32'h00000000;
+end
 
 always @ (posedge clk )
 if ( ram_cen & ~ram_wen )
@@ -70,8 +75,18 @@ else;
 
 
 always @ (posedge clk )
-if (ram_cen & ram_wen & (ram_addr[31:28]==4'h4))
-    ram[ram_addr[27:2]] <= #`DEL { (ram_flag[3] ? ram_wdata[31:24]:ram[ram_addr[27:2]][31:24]),(ram_flag[2] ? ram_wdata[23:16]:ram[ram_addr[27:2]][23:16]),(ram_flag[1] ? ram_wdata[15:8]:ram[ram_addr[27:2]][15:8]),(ram_flag[0] ? ram_wdata[7:0]:ram[ram_addr[27:2]][7:0])};
+if (ram_cen & ram_wen & (ram_addr[31:28]==4'h4)) begin
+    ram[ram_addr[27:2]] <= #`DEL {
+	(ram_flag[3] ? ram_wdata[31:24]:ram[ram_addr[27:2]][31:24]),
+	(ram_flag[2] ? ram_wdata[23:16]:ram[ram_addr[27:2]][23:16]),
+	(ram_flag[1] ? ram_wdata[15:8]:ram[ram_addr[27:2]][15:8]),
+	(ram_flag[0] ? ram_wdata[7:0]:ram[ram_addr[27:2]][7:0])};
+    //$display("write: %x: %x", ram_addr[27:2], {
+    //    (ram_flag[3] ? ram_wdata[31:24]:ram[ram_addr[27:2]][31:24]),
+    //    (ram_flag[2] ? ram_wdata[23:16]:ram[ram_addr[27:2]][23:16]),
+    //    (ram_flag[1] ? ram_wdata[15:8]:ram[ram_addr[27:2]][15:8]),
+    //    (ram_flag[0] ? ram_wdata[7:0]:ram[ram_addr[27:2]][7:0])});
+end
 else;
 
 
@@ -116,6 +131,12 @@ arm9_compatiable_code u_arm9(
 //	$display("rom_addr: %x", rom_addr);
 //if (ram_addr[31:28]==4'h4)
 //	$display("ram_addr: %x", ram_addr);
+
+always @ (posedge clk) begin
+//	if (ram_cen && ram_addr[31:28]==4'h4 &&
+//		ram_addr > 32'h40002000 && ram_addr < 32'h40002060)
+//		$display("%t ram[%x]: %x", $realtime, ram_addr, ram_rdata);
+end
 
 endmodule
 

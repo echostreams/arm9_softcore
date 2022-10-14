@@ -4,8 +4,8 @@ EXTERN(_startup)
 /* Memory Definitions */
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00020000
-  RAM   (rw) : ORIGIN = 0x40000000, LENGTH = 0x00008000
+  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00008000
+  RAM   (rw) : ORIGIN = 0x40000000, LENGTH = 0x00004000
 }
 
 /*
@@ -91,6 +91,7 @@ SECTIONS
    * Reserve memory for heap and stack. The linker will issue an error if
    * there is not enough memory.
    */
+/*
    ._heap :
    {
         . = ALIGN(4);
@@ -102,9 +103,9 @@ SECTIONS
 
    ._stack :
    {
-        . = ALIGN(4);
+        . = ALIGN(8);
         . = . + _stack_size;
-        . = ALIGN(4);
+        . = ALIGN(8);
    } >RAM
-
+*/
 }

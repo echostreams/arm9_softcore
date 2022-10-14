@@ -317,7 +317,7 @@ lowLevelInit(void)
 
   //set the peripheral bus speed, PCLK = CCLK / PBSD
 	//VPBDIV = PBSD;
-	
+
 	//initialize VIC
   //VICIntEnClr    = 0xFFFFFFFF;           /* Disable ALL interrupts                             */
   //VICProtection  = 0;                    /* Setup interrupt controller                         */
@@ -339,17 +339,17 @@ lowLevelInit(void)
   //VICVectAddr13  = (unsigned int)0;      /* Set the vector address                             */
   //VICVectAddr14  = (unsigned int)0;      /* Set the vector address                             */
   //VICVectAddr15  = (unsigned int)0;      /* Set the vector address                             */
-	
-  //enable interrupts (both IRQ and FIQ) 
+
+  //enable interrupts (both IRQ and FIQ)
 #ifdef __IAR_SYSTEMS_ICC__
   __enable_interrupt();
 #else
 	/*
-  asm volatile ("mrs r3, cpsr       \n\t"                          
-                "bic r3, r3, #0xC0  \n\t"                      
-                "msr cpsr, r3       \n\t"                          
-                :                                       
-                :                                       
+  asm volatile ("mrs r3, cpsr       \n\t"
+                "bic r3, r3, #0xC0  \n\t"
+                "msr cpsr, r3       \n\t"
+                :
+                :
                 : "r3" );
 	*/
 #endif
@@ -366,7 +366,7 @@ eaInit(void)
 {
   //initialize the consol
   //consolInit();
-  
+
 #ifdef CONSOL_STARTUP_DELAY
   /*
    * setup timer #1 for a short delay
@@ -377,7 +377,7 @@ eaInit(void)
   //TIMER1_IR  = 0xff;          //reset all interrrupt flags
   //TIMER1_MCR = 0x04;          //stop timer on match
   //TIMER1_TCR = 0x01;          //start timer
-  
+
   //wait until delay time has elapsed
   //while (TIMER1_TCR & 0x01)
   //  ;
@@ -524,10 +524,11 @@ char * _sbrk_r (struct _reent *ptr, int nbytes)
 {
     char        *base;
 
-    if (!heap_ptr)  // if it is the very first time for memory allocation.
+    if (!heap_ptr)  {// if it is the very first time for memory allocation.
 //	   heap_ptr = (char *)&_heap_begin;      // the begining of the heap memory.
 	   heap_ptr = pHeapStart;
-
+	printf("Heap: %08x - %08x\n", pHeadStart, pHeapEnd);
+    }
     base = heap_ptr;
     heap_ptr += nbytes;
 //    if ( heap_ptr >= ( char *) &_heap_end )
