@@ -408,50 +408,50 @@ LOAD /usr/lib/gcc/arm-none-eabi/9.2.1/crtn.o
 .iplt           0x00000000000050dc        0x0
  .iplt          0x00000000000050dc        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
 
-.text.startup   0x00000000000050dc      0x6ec
- .text.startup  0x00000000000050dc      0x6ec dhry_1.o
+.text.startup   0x00000000000050dc      0x714
+ .text.startup  0x00000000000050dc      0x714 dhry_1.o
                 0x00000000000050dc                main
-                0x00000000000057c8                . = ALIGN (0x4)
+                0x00000000000057f0                . = ALIGN (0x4)
 
-.rodata         0x00000000000057c8      0x6bd
+.rodata         0x00000000000057f0      0x6e1
  *(.rodata)
- .rodata        0x00000000000057c8        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-impure.o)
-                0x00000000000057c8                _global_impure_ptr
- .rodata        0x00000000000057cc       0x60 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-findfp.o)
-                0x00000000000057cc                __sf_fake_stderr
-                0x00000000000057ec                __sf_fake_stdout
-                0x000000000000580c                __sf_fake_stdin
+ .rodata        0x00000000000057f0        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-impure.o)
+                0x00000000000057f0                _global_impure_ptr
+ .rodata        0x00000000000057f4       0x60 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-findfp.o)
+                0x00000000000057f4                __sf_fake_stderr
+                0x0000000000005814                __sf_fake_stdout
+                0x0000000000005834                __sf_fake_stdin
  *(.rodata*)
  .rodata.str1.1
-                0x000000000000582c      0x556 dhry_1.o
-                                        0x5c2 (size before relaxing)
+                0x0000000000005854      0x57c dhry_1.o
+                                        0x5e8 (size before relaxing)
  .rodata.str1.1
-                0x0000000000005d82       0xc7 framework.o
- *fill*         0x0000000000005e49        0x3 
+                0x0000000000005dd0       0xc7 framework.o
+ *fill*         0x0000000000005e97        0x1 
  .rodata.str1.4
-                0x0000000000005e4c       0x13 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-nano-vfprintf.o)
- *fill*         0x0000000000005e5f        0x1 
+                0x0000000000005e98       0x13 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-nano-vfprintf.o)
+ *fill*         0x0000000000005eab        0x1 
  .rodata.str1.4
-                0x0000000000005e60       0x25 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000000000005eac       0x25 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/libc_nano.a(lib_a-nano-vfprintf_i.o)
 
-.eh_frame       0x0000000000005e88        0x4
- .eh_frame      0x0000000000005e88        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
- .eh_frame      0x0000000000005e88        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/crtend.o
+.eh_frame       0x0000000000005ed4        0x4
+ .eh_frame      0x0000000000005ed4        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
+ .eh_frame      0x0000000000005ed4        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/crtend.o
 
-.ARM.extab      0x0000000000005e8c        0x0
- .ARM.extab     0x0000000000005e8c        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/crt0.o
+.ARM.extab      0x0000000000005ed8        0x0
+ .ARM.extab     0x0000000000005ed8        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/crt0.o
 
-.ARM.exidx      0x0000000000005e8c        0x8
- .ARM.exidx     0x0000000000005e8c        0x8 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/crt0.o
+.ARM.exidx      0x0000000000005ed8        0x8
+ .ARM.exidx     0x0000000000005ed8        0x8 /usr/lib/gcc/arm-none-eabi/9.2.1/../../../arm-none-eabi/lib/crt0.o
                                          0x10 (size before relaxing)
 
-.rel.dyn        0x0000000000005e94        0x0
- .rel.iplt      0x0000000000005e94        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
-                0x0000000000005e94                . = ALIGN (0x4)
-                0x0000000000005e94                _etext = .
+.rel.dyn        0x0000000000005ee0        0x0
+ .rel.iplt      0x0000000000005ee0        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
+                0x0000000000005ee0                . = ALIGN (0x4)
+                0x0000000000005ee0                _etext = .
                 [!provide]                        PROVIDE (etext = .)
 
-.data           0x0000000040000080       0x6c load address 0x0000000000005e94
+.data           0x0000000040000080       0x6c load address 0x0000000000005ee0
                 0x0000000040000080                _data = .
  *(.data)
  .data          0x0000000040000080        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crti.o
@@ -521,26 +521,26 @@ LOAD /usr/lib/gcc/arm-none-eabi/9.2.1/crtn.o
  .data          0x00000000400000ec        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtend.o
  .data          0x00000000400000ec        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtn.o
 
-.init_array     0x00000000400000ec        0x4 load address 0x0000000000005f00
+.init_array     0x00000000400000ec        0x4 load address 0x0000000000005f4c
  .init_array    0x00000000400000ec        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
 
-.fini_array     0x00000000400000f0        0x4 load address 0x0000000000005f04
+.fini_array     0x00000000400000f0        0x4 load address 0x0000000000005f50
  .fini_array    0x00000000400000f0        0x4 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
 
 .tm_clone_table
-                0x00000000400000f4        0x0 load address 0x0000000000005f08
+                0x00000000400000f4        0x0 load address 0x0000000000005f54
  .tm_clone_table
                 0x00000000400000f4        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
  .tm_clone_table
                 0x00000000400000f4        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtend.o
 
-.igot.plt       0x00000000400000f4        0x0 load address 0x0000000000005f08
+.igot.plt       0x00000000400000f4        0x0 load address 0x0000000000005f54
  .igot.plt      0x00000000400000f4        0x0 /usr/lib/gcc/arm-none-eabi/9.2.1/crtbegin.o
                 0x00000000400000f4                . = ALIGN (0x4)
                 0x00000000400000f4                _edata = .
                 [!provide]                        PROVIDE (edata = .)
 
-.bss            0x00000000400000f4     0x28cc load address 0x0000000000005f08
+.bss            0x00000000400000f4     0x28cc load address 0x0000000000005f54
                 0x00000000400000f4                _bss = .
                 0x00000000400000f4                __bss_start = .
                 0x00000000400000f4                __bss_start__ = .

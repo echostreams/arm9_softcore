@@ -33,10 +33,10 @@ TARGET_MODE	= arm
 CPU_VARIANT	= LPC2104
 #CPU		= arm926ej-s
 CPU		= arm7tdmi
-OPTS		= -mcpu=$(CPU)
+OPTS		= -mcpu=$(CPU) -msoft-float -mfloat-abi=soft
 LD_SCRIPT	= link_16k_128k_rom.ld
 LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
-			-Wl,-Map=$(NAME).map,--cref -Wl,--gc-sections -lnosys -nostartfiles
+			-Wl,-Map=$(NAME).map,--cref -Wl,--gc-sections -lnosys -nostartfiles -u _printf_float
 
 CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -flto -ffunction-sections -fdata-sections -fno-builtin
 CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS)

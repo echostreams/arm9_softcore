@@ -46,8 +46,12 @@ int             Arr_2_Glob [50] [50];
 
 #ifdef TIMES
 struct tms      time_info;
-extern  int     times (void);
+extern clock_t  times (struct tms *buf);
                 /* see library function "times" */
+#ifndef HZ
+/* define the granularity of your times(2) function (when used) */
+#define HZ      100             /* times(2) returns 1/60 second (most) */
+#endif
 #define Too_Small_Time (2*HZ)
                 /* Measurements should last at least about 2 seconds */
 #endif
@@ -65,6 +69,7 @@ extern clock_t clock(void);
 long            Begin_Time,
                 End_Time,
                 User_Time;
+
 float           Microseconds,
                 Dhrystones_Per_Second;
 
@@ -199,8 +204,8 @@ int main (int argc, char **argv)
   memset(Next_Ptr_Glob, 0, sizeof(Rec_Type));
   memset(Ptr_Glob, 0, sizeof(Rec_Type));
 
-  //printf("Next_Ptr_Glob: %x\n", Next_Ptr_Glob);
-  //printf("     Ptr_Glob: %x\n", Ptr_Glob);
+  printf("Next_Ptr_Glob: %x\n", Next_Ptr_Glob);
+  printf("     Ptr_Glob: %x\n", Ptr_Glob);
 
   Ptr_Glob->Ptr_Comp                    = Next_Ptr_Glob;
   Ptr_Glob->Discr                       = Ident_1;
@@ -240,7 +245,11 @@ int main (int argc, char **argv)
   printf ("Please give the number of runs through the benchmark: ");
   {
     int n;
-    n = 2000;//scanf ("%d", &n);
+#ifdef LPC2104
+    n = 2000;
+#else
+    scanf ("%d", &n);
+#endif
     Number_Of_Runs = n;
   }
   printf ("\n");

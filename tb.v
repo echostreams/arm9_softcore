@@ -5,7 +5,7 @@ module tb;
 //parameter BINFILE = "./DHRY/Obj/DHRY.bin";
 //parameter BINFILE = "./DHRY.bin";
 //parameter BINFILE = "./hello/hello";
-parameter BINFILE = "./dhry/dhry";
+//parameter BINFILE = "./dhry/dhry";
 //parameter BINFILE = "./testcode/MiniDemo2148.bin";
 //parameter BINFILE = "./lpc2104/hello.bin";
 
@@ -17,23 +17,34 @@ initial #1000 rst = 1'b0;
 
 reg [7:0] rom [32767:0];
 integer i;
+reg [1023:0] filename;
+integer dummy;
 
 integer fd,fx;
 initial begin
   for(i=0;i<32768;i=i+1)
       rom[i] = 0;
-  fd = $fopen(BINFILE,"rb");
-  fx = $fread(rom,fd);
-  $fclose(fd);
-  fd = $fopen("DHRY.coe", "w");
-  $fdisplay(fd, "memory_initialization_radix = 16;");
-  $fdisplay(fd, "memory_initialization_vector =");
-  for (i = 0; i < 8192; i = i+1)
-    $fdisplay(fd, "%2h%2h%2h%2h%1s", rom[4*i+3], rom[4*i+2], rom[4*i+1], rom[4*i], (i==8191)?";":",");
-  $fclose(fd);
 
-	$dumpfile("test.vcd");
-	$dumpvars(0);
+  filename = 0;
+  dummy = $value$plusargs("binfile=%s", filename);
+  if (filename == 0) begin
+	$display("WARNING! No content specified for program memory");
+	$finish();
+  end
+  else begin
+  	fd = $fopen(filename,"rb");
+  	fx = $fread(rom,fd);
+  	$fclose(fd);
+	//fd = $fopen("DHRY.coe", "w");
+  	//$fdisplay(fd, "memory_initialization_radix = 16;");
+  	//$fdisplay(fd, "memory_initialization_vector =");
+  	//for (i = 0; i < 8192; i = i+1)
+  	//  $fdisplay(fd, "%2h%2h%2h%2h%1s", rom[4*i+3], rom[4*i+2], rom[4*i+1], rom[4*i], (i==8191)?";":",");
+  	//$fclose(fd);
+  end
+
+	//$dumpfile("test.vcd");
+	//$dumpvars(0);
 
 end
 

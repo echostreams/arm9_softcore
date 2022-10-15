@@ -34,7 +34,7 @@ TARGET_MODE	= arm
 CPU_VARIANT	= LPC2104
 #CPU		= arm926ej-s
 CPU		= arm7tdmi
-OPTS		= -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -mfloat-abi=softfp
+OPTS		= -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft
 
 #----------------------------------------------------------------------
 # COMPILER AND ASSEMBLER OPTIONS
@@ -48,7 +48,7 @@ W_OPTS    = -Wall -Wcast-align -Wcast-qual -Wimplicit \
 LD_SCRIPT	= link_16k_128k_rom.ld
 LD_FLAGS	= -Wl,--gc-sections -lnosys -nostartfiles
 LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
-			-Wl,-Map=$(NAME).map,--cref
+			-Wl,-Map=$(NAME).map,--cref #-u _printf_float
 
 CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -D MSC_CLOCK #-flto -ffunction-sections -fdata-sections -fno-builtin
 CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS) #$(W_OPTS)
