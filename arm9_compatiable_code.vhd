@@ -243,26 +243,30 @@ architecture RTL of arm9_compatiable_code is
   function hw_loop(v: std_logic_vector) return natural is
     variable h: natural;
   begin
-    h := 0;
+    h := 0;    
     for i in v'range loop
       if v(i) = '1' then
         h := h + 1;
       end if;
     end loop;
     return h;
-  end function hw_loop;  
+  end function hw_loop;
+
   -- Log-tree-based, using a recursive function:
   function hw_tree(v: std_logic_vector) return natural is
     constant size: natural := v'length;
     constant vv: std_logic_vector(size - 1 downto 0) := v;
     variable h: natural;
   begin
-    h := 0;
+    report ("hw_tree length: " & integer'image(size));
+    report ("hw_tree vector: " & to_string(vv));
+    h := 0;    
     if size = 1 and vv(0) = '1' then
       h := 1;
     elsif size > 1 then
       h := hw_tree(vv(size - 1 downto size / 2)) + hw_tree(vv(size / 2 - 1 downto 0));
     end if;
+    report ("hw_tree return: " & integer'image(h));
     return h;
   end function hw_tree;
 
@@ -359,7 +363,7 @@ begin
   cmd_ok <= not int_all and cmd_flag and cond_satisfy;
 
   -- cmd_sum_m <= (cmd(0)+cmd(1)+cmd(2)+cmd(3)+cmd(4)+cmd(5)+cmd(6)+cmd(7)+cmd(8)+cmd(9)+cmd(10)+cmd(11)+cmd(12)+cmd(13)+cmd(14)+cmd(15));
-  cmd_sum_m <= std_logic_vector(to_unsigned(hw_loop(cmd(15 downto 0)), 4));
+  cmd_sum_m <= std_logic_vector(to_unsigned(hw_tree(cmd(15 downto 0)), cmd_sum_m'length));
 
   code <= rom_data;
 
@@ -422,7 +426,7 @@ begin
   code_rs_vld <= code_flag and (code_is_dp1 or code_is_mult or code_is_multl);
 
   -- code_sum_m <= (code(0)+code(1)+code(2)+code(3)+code(4)+code(5)+code(6)+code(7)+code(8)+code(9)+code(10)+code(11)+code(12)+code(13)+code(14)+code(15));
-  code_sum_m <= std_logic_vector(to_unsigned(hw_tree(code(15 downto 0)), 4));
+  code_sum_m <= std_logic_vector(to_unsigned(hw_tree(code(15 downto 0)), code_sum_m'length));
 
   cpsr <= (cpsr_n & cpsr_z & cpsr_c & cpsr_v & cpsr_i & cpsr_f & cpsr_m);
 
@@ -459,7 +463,7 @@ begin
   ra <= ra_fiq
   when (cpsr_m = "10001") else ra_usr;
 
-  ram_addr <= (cmd_addr(31 downto 2) & '0');
+  ram_addr <= (cmd_addr(31 downto 2) & "00");
 
   ram_cen <= '1' when cpu_en = '1' and cmd_ok = '1' and (cmd_is_ldrh0 = '1' or cmd_is_ldrh1 = '1' or cmd_is_ldrsb0 = '1' or cmd_is_ldrsb1 = '1' or 
   cmd_is_ldrsh0 = '1' or 
@@ -505,7 +509,7 @@ begin
   --*****************************************************/
   --register statement area
   --*****************************************************/
-  processing_0 : process
+  processing_0 : process (all)
   begin
     if (cmd_is_mult or cmd_is_b or cmd_is_bx) then
       add_b <= sec_operand;
@@ -528,7 +532,7 @@ begin
       add_b <= sec_operand;
     end if;
   end process;
-  processing_1 : process
+  processing_1 : process (all)
   begin
     if (cmd_is_mult or cmd_is_b or cmd_is_bx) then
       add_c <= '0';
@@ -1933,7 +1937,7 @@ begin
       ram_flag <= "1111";
     end if;
   end process;
-  processing_55 : process
+  processing_55 : process (cmd, cmd_is_ldm)
   begin
     if (cmd_is_ldm) then
       if (cmd(0)) then
@@ -1987,7 +1991,6 @@ begin
     elsif (cmd_is_ldrh0 or cmd_is_ldrh1) then
       ram_wdata <= (rna(15 downto 0) & rna(15 downto 0));
     else
-
       ram_wdata <= rna;
     end if;
   end process;
@@ -2075,7 +2078,7 @@ begin
       end if;
     end if;
   end process;
-  processing_60 : process
+  processing_60 : process (cpsr_m, rd)
   begin
     case ((cpsr_m)) is
     when "10001" =>
@@ -2220,7 +2223,8 @@ begin
       end if;
     end if;
   end process;
-  processing_67 : process
+
+  processing_67 : process (cpsr_m)
   begin
     case ((cpsr_m)) is
     when "10001" =>
@@ -2499,6 +2503,7 @@ begin
       rn <= rnb;
     end if;
   end process;
+
   processing_78 : process (clk, rst)
   begin
     if (rst) then
