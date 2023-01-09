@@ -1,6 +1,9 @@
 library ieee;
- use ieee.std_logic_1164.all;
- use ieee.numeric_std.all;
+  use ieee.std_logic_1164.all;
+  use ieee.numeric_std.all;
+
+library std;
+  use std.textio.all;
 
 entity tb is
 end tb;
@@ -41,79 +44,64 @@ architecture RTL of tb is
 
   constant clk_period : time := 10 ns; -- 100 MHz
 
-  constant ram_depth : natural := 4096;
+  constant ram_depth : natural := 4096;   -- 16 kB ON-CHIP STATIC RAM (LPC2104: 0x4000_0000)
   constant ram_width : natural := 32;
-  constant rom_depth : natural := 32768;
+  constant rom_depth : natural := 131072; -- 128k kB ON-CHIP FLASH MEMORY (0x0000_0000)
   constant rom_width : natural := 8;
 
   type rom_type is array(0 to rom_depth - 1) of std_logic_vector(rom_width - 1 downto 0);
   type ram_type is array(0 to ram_depth - 1) of std_logic_vector(ram_width - 1 downto 0);
 
   signal clk : std_logic;
-  --always clk = #500 ~clk; //1MHz
-
   signal rst : std_logic;
 
+  -- 128 kB ROM
   signal rom : rom_type;
-  --constant i : integer;
-  signal filename : std_logic_vector(1023 downto 0);
-  --constant dummy : integer;
-
-
-  --constant fd, fx : integer;
-  --fd = $fopen("DHRY.coe", "w");
-  --$fdisplay(fd, "memory_initialization_radix = 16;");
-  --$fdisplay(fd, "memory_initialization_vector =");
-  --for (i = 0; i < 8192; i = i+1)
-  --  $fdisplay(fd, "%2h%2h%2h%2h%1s", rom[4*i+3], rom[4*i+2], rom[4*i+1], rom[4*i], (i==8191)?";":",");
-  --$fclose(fd);
-
-
-  --$dumpfile("test.vcd");
-  --$dumpvars(0);
-
-
-
-
-  signal rom_en : std_logic;
-  signal rom_addr : std_logic_vector(31 downto 0);
-  signal rom_data : std_logic_vector(31 downto 0);
-  signal ram_cen : std_logic;
-  signal ram_wen : std_logic;
-  signal ram_flag : std_logic_vector(3 downto 0);
-  signal ram_addr : std_logic_vector(31 downto 0);
+ 
+  signal rom_en    : std_logic;
+  signal rom_addr  : std_logic_vector(31 downto 0);
+  signal rom_data  : std_logic_vector(31 downto 0) := x"00000000";
+  signal ram_cen   : std_logic;
+  signal ram_wen   : std_logic;
+  signal ram_flag  : std_logic_vector(3 downto 0);
+  signal ram_addr  : std_logic_vector(31 downto 0);
   signal ram_wdata : std_logic_vector(31 downto 0);
 
-  
-
-  --16k RAM
-  
+ 
+  -- 16 kB RAM
   signal ram : ram_type;
-
   signal ram_rdata : std_logic_vector(31 downto 0);
 
   signal irq : std_logic;
 
   signal timer_cnt : integer := 0;
 begin
-/*
+
   read_bf: process is
     type char_file_t is file of character;
     file char_file : char_file_t;
     variable char_v : character;
     subtype byte_t is natural range 0 to 255;
     variable byte_v : byte_t;
+    variable byte_index : integer;
+    -- variable vec_index : integer;
   begin
-    file_open(char_file, "./DHRY-keil/Obj/DHRY.bin");
+    --file_open(char_file, "./DHRY-keil/Obj/DHRY.bin");
+    file_open(char_file, "./dhry/dhry");
+    byte_index := 0;
     while not endfile(char_file) loop
       read(char_file, char_v);
       byte_v := character'pos(char_v);
-      report "Char: " & " #" & integer'image(byte_v);
+      -- vec_index := byte_index mod 4;
+      -- ram(byte_index / 4)( (vec_index + 1) * 8 - 1 downto (vec_index + 1) * 8 - 8) <= std_logic_vector(to_unsigned(byte_v, 8));
+      rom(byte_index) <= std_logic_vector(to_unsigned(byte_v, 8));
+      -- report "Char: " & " #" & integer'image(byte_v) & " @" & integer'image(byte_index);
+      byte_index := byte_index + 1;
     end loop;
     file_close(char_file);
     wait;
   end process;
-*/  
+  
   
   clk_gen : process
   begin
@@ -123,7 +111,6 @@ begin
     wait for clk_period/2;
   end process;
 
-  
   rst <= '1', '0' after (10 * clk_period);
   
   processing_2 : process (clk)
@@ -172,6 +159,7 @@ begin
       end if;
     end if;
   end process;
+
   processing_5 : process (clk)
   begin
     if (rising_edge(clk)) then
@@ -197,7 +185,8 @@ begin
           ram(to_integer(unsigned(ram_addr(27 downto 2))))(7 downto 0) <= ram(to_integer(unsigned(ram_addr(27 downto 2))))(7 downto 0);
         end if;
           
-      else      --$display("write: %x: %x", ram_addr[27:2], {
+      else      
+      -- $display("write: %x: %x", ram_addr[27:2], {
       --    (ram_flag[3] ? ram_wdata[31:24]:ram[ram_addr[27:2]][31:24]),
       --    (ram_flag[2] ? ram_wdata[23:16]:ram[ram_addr[27:2]][23:16]),
       --    (ram_flag[1] ? ram_wdata[15:8]:ram[ram_addr[27:2]][15:8]),
@@ -211,16 +200,24 @@ begin
   end process;
 
   processing_6 : process (clk)
+
+    --variable L : LINE;
+
   begin
     if (rising_edge(clk)) then
       if (ram_cen = '1' and ram_wen = '1' and (ram_addr = X"e0000004")) then
         --(null)("%s", ram_wdata(7 downto 0));
+        --report to_string(character'val(to_integer(unsigned(ram_wdata(7 downto 0)))));
+        --write(L, character'val(to_integer(unsigned(ram_wdata(7 downto 0)))));
+        --writeline(OUTPUT, L);
+        write(OUTPUT, to_string(character'val(to_integer(unsigned(ram_wdata(7 downto 0))))));
       else
 
         null;
       end if;
     end if;
   end process;
+
   processing_7 : process (clk)
   begin
     if (rising_edge(clk)) then
@@ -232,27 +229,29 @@ begin
       end if;
     end if;
   end process;
+
   irq <= '1' when (timer_cnt = 9999) else '0';
 
   u_arm9 : arm9_compatiable_code
-  port map (
-    clk => clk,
-    cpu_en => '1',
-    cpu_restart => '0',
-    fiq => '0',
-    irq => irq,
-    ram_abort => '0',
-    ram_rdata => ram_rdata,
-    rom_abort => '0',
-    rom_data => rom_data,
-    rst => rst,
+    port map (
+      clk         => clk,
+      cpu_en      => '1',
+      cpu_restart => '0',
+      fiq         => '0',
+      irq         => irq,
+      ram_abort   => '0',
+      ram_rdata   => ram_rdata,
+      rom_abort   => '0',
+      rom_data    => rom_data,
+      rst         => rst,
 
-    ram_addr => ram_addr,
-    ram_cen => ram_cen,
-    ram_flag => ram_flag,
-    ram_wdata => ram_wdata,
-    ram_wen => ram_wen,
-    rom_addr => rom_addr,
-    rom_en => rom_en
-  );
+      ram_addr  => ram_addr,
+      ram_cen   => ram_cen,
+      ram_flag  => ram_flag,
+      ram_wdata => ram_wdata,
+      ram_wen   => ram_wen,
+      rom_addr  => rom_addr,
+      rom_en    => rom_en
+    );
+
 end RTL;

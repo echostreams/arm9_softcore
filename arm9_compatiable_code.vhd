@@ -1,6 +1,7 @@
 library ieee;
   use ieee.std_logic_1164.all;
-  use ieee.numeric_std.all;  
+  use ieee.numeric_std.all;
+  use ieee.numeric_std_unsigned.all;
 
 entity arm9_compatiable_code is
   port (
@@ -258,15 +259,15 @@ architecture RTL of arm9_compatiable_code is
     constant vv: std_logic_vector(size - 1 downto 0) := v;
     variable h: natural;
   begin
-    report ("hw_tree length: " & integer'image(size));
-    report ("hw_tree vector: " & to_string(vv));
+    -- report ("hw_tree length: " & integer'image(size));
+    -- report ("hw_tree vector: " & to_string(vv));
     h := 0;    
     if size = 1 and vv(0) = '1' then
       h := 1;
     elsif size > 1 then
       h := hw_tree(vv(size - 1 downto size / 2)) + hw_tree(vv(size / 2 - 1 downto 0));
     end if;
-    report ("hw_tree return: " & integer'image(h));
+    -- report ("hw_tree return: " & integer'image(h));
     return h;
   end function hw_tree;
 
@@ -438,7 +439,7 @@ begin
 
   high_bit <= high_middle(0);
 
-  high_middle <= std_logic_vector(unsigned'("0" & add_a(31)) + unsigned'("0" & add_b(31)) + unsigned'("0" + sum_middle(31)));
+  high_middle <= std_logic_vector(unsigned'('0' & add_a(31)) + unsigned'('0' & add_b(31)) + unsigned'('0' & sum_middle(31)));
 
   hold_en <= '1' when cmd_ok = '1' and (cmd_is_swp = '1' or cmd_is_multl = '1' or (cmd_is_ldm = '1' and (cmd_sum_m /= "00000"))) else '0';
 
@@ -450,18 +451,19 @@ begin
 
   ldm_rf_vld <= '1' when (ldm_vld = '1' and (ldm_num = X"f")) or ((cmd_ok = '1' and cmd_is_ldm = '1' and cmd(20) = '1') and (ldm_sel = X"f")) else '0';
 
-  mult_ans <= std_logic_vector(to_unsigned(to_integer(unsigned(code_rm)) * to_integer(unsigned(code_rs)), mult_ans'length));
+  --mult_ans <= std_logic_vector(to_unsigned(to_integer(unsigned(code_rm)) * to_integer(unsigned(code_rs)), mult_ans'length));
+  mult_ans <= code_rm * code_rs;
 
   or_ans <= rnb or sec_operand;
 
-  r8 <= r8_fiq
-  when (cpsr_m = "10001") else r8_usr;
+  r8 <= r8_fiq when (cpsr_m = "10001") else
+        r8_usr;
 
-  r9 <= r9_fiq
-  when (cpsr_m = "10001") else r9_usr;
+  r9 <= r9_fiq when (cpsr_m = "10001") else
+        r9_usr;
 
-  ra <= ra_fiq
-  when (cpsr_m = "10001") else ra_usr;
+  ra <= ra_fiq when (cpsr_m = "10001") else
+        ra_usr;
 
   ram_addr <= (cmd_addr(31 downto 2) & "00");
 
@@ -470,8 +472,7 @@ begin
   cmd_is_ldrsh1 = '1' or cmd_is_ldr0 = '1' or cmd_is_ldr1 = '1' or cmd_is_swp = '1' or 
   cmd_is_swpx = '1' or (cmd_is_ldm = '1' and (cmd_sum_m /= "00000"))) else '0';
 
-  ram_wen <= '0'
-  when cmd_is_swp else not cmd(20);
+  ram_wen <= '0' when cmd_is_swp else not cmd(20);
 
   rb <= rb_fiq
   when (cpsr_m = "10001") else rb_usr;
@@ -479,16 +480,18 @@ begin
   rc <= rc_fiq
   when (cpsr_m = "10001") else rc_usr;
 
-  rf_b <= std_logic_vector(to_unsigned(to_integer(unsigned(rf)) - 4, rf_b'length));
+  --rf_b <= std_logic_vector(to_unsigned(to_integer(signed(rf)) - 4, rf_b'length));
+  rf_b <= rf - 4;
 
   rom_addr <= rf;
 
   rom_en <= cpu_en and (not (int_all or to_rf_vld or cha_rf_vld or go_rf_vld or wait_en or hold_en));
 
-  sum_middle <= std_logic_vector(to_unsigned(to_integer(unsigned(add_a(30 downto 0))) + 
-                                             to_integer(unsigned(add_b(30 downto 0))) + 
-                                             to_integer(unsigned'("0" & add_c)), 
-                                             32));
+  --sum_middle <= std_logic_vector(to_unsigned(to_integer(unsigned(add_a(30 downto 0))) + 
+  --                                           to_integer(unsigned(add_b(30 downto 0))) + 
+  --                                           to_integer(unsigned'('0' & add_c)), 
+  --                                           32));
+  sum_middle <= resize(add_a(30 downto 0), 32) + add_b(30 downto 0) + add_c;
 
   sum_rn_rm <= (high_bit & sum_middle(30 downto 0));
 
@@ -511,6 +514,7 @@ begin
   --*****************************************************/
   processing_0 : process (all)
   begin
+
     if (cmd_is_mult or cmd_is_b or cmd_is_bx) then
       add_b <= sec_operand;
     elsif (cmd_is_multl or cmd_is_multlx) then
@@ -559,7 +563,7 @@ begin
       add_c <= '0';
     end if;
   end process;
-  processing_2 : process
+  processing_2 : process (all)
   begin
     if (code(27 downto 25) = "000") then
       if (not code(4)) then
@@ -626,12 +630,12 @@ begin
     end if;
   end process;
 
-  processing_3 : process
+  processing_3 : process (all)
   begin
     cha_num <= cmd(15 downto 12);
   end process;
 
-  processing_4 : process
+  processing_4 : process (all)
   begin
     if (cmd_ok) then
       cha_vld <= ((cmd_is_ldrh0 or cmd_is_ldrh1 or cmd_is_ldrsb0 or cmd_is_ldrsb1 or cmd_is_ldrsh0 or cmd_is_ldrsh1 or cmd_is_ldr0 or cmd_is_ldr1) and cmd(20)) or cmd_is_swp;
@@ -694,7 +698,7 @@ begin
       end if;
     end if;
   end process;
-  processing_6 : process
+  processing_6 : process (all)
   begin
     if (cmd_is_ldm) then
       cmd_addr <= sum_rn_rm;
@@ -764,10 +768,10 @@ begin
       end if;
     end if;
   end process;
-  processing_10 : process
+  processing_10 : process (all)
   begin
     if (code_is_ldrh1 or code_is_ldrsb1 or code_is_ldrsh1) then
-      code_rm <= (code(11 downto 8) & code(3 downto 0));
+      code_rm <= resize(code(11 downto 8) & code(3 downto 0), code_rm'length);
     elsif (code_is_b) then      
       -- code_rm <= (concatenate(6, code(23)) & code(23 downto 0) & '0');      
       code_rm <= code(23) & code(23) & code(23) & code(23) & code(23) & code(23) & code(23 downto 0) & "00";
@@ -778,7 +782,7 @@ begin
       when "01" =>
         code_rm <= x"00000000";
       when "10" =>
-        code_rm <= (code_sum_m & '0');
+        code_rm <= (25b"0" & code_sum_m & "00");
       when "11" =>
         code_rm <= 32b"100";
       when others => code_rm <= x"00000000";
@@ -795,7 +799,7 @@ begin
       code_rm <= code_rma;
     end if;
   end process;
-  processing_11 : process
+  processing_11 : process (all)
   begin
     case ((code(3 downto 0))) is
     when X"0" =>
@@ -835,21 +839,22 @@ begin
   end process;
 
 
-  processing_12 : process
+  processing_12 : process (all)
   begin
     if (code_is_dp0 or code_is_ldr1) then
       code_rot_num <= code(11 downto 7) when (code(6 downto 5) = "00") else 
-                      std_logic_vector(to_unsigned(to_integer(unsigned(not code(11 downto 7)))+1, 5));
+                      (not code(11 downto 7)) + 1;
     elsif (code_is_dp1) then
       code_rot_num <= code_rsa(4 downto 0) when (code(6 downto 5) = "00") else 
-                      std_logic_vector(to_unsigned(to_integer(unsigned(not code_rsa(4 downto 0)))+1, 5));
+                      (not code_rsa(4 downto 0)) + 1;
     elsif (code_is_msr1 or code_is_dp2) then
-      code_rot_num <= std_logic_vector(to_unsigned(to_integer(unsigned(not code(11 downto 8)))+1, 4)) & "0";
+      -- code_rot_num <= std_logic_vector(to_unsigned(to_integer(unsigned(not code(11 downto 8)))+1, 4)) & '0';
+      code_rot_num <= ((not code(11 downto 8)) + 1) & '0';
     else
       code_rot_num <= "00000";
     end if;
   end process;
-  processing_13 : process
+  processing_13 : process (all)
   begin
     if (code_is_multl) then
       if (code(22) and code_rsa(31)) then
@@ -889,7 +894,7 @@ begin
       end if;
     end if;
   end process;
-  processing_15 : process
+  processing_15 : process (all)
   begin
     case ((code(11 downto 8))) is
     when X"0" =>
@@ -946,7 +951,7 @@ begin
       end if;
     end if;
   end process;
-  processing_17 : process
+  processing_17 : process (all)
   begin
     case ((cmd(31 downto 28))) is
     when X"0" =>
@@ -1322,7 +1327,7 @@ begin
       end if;
     end if;
   end process;
-  processing_25 : process
+  processing_25 : process (all)
   begin
     case ((cmd(24 downto 21))) is
     when X"0" =>
@@ -1382,7 +1387,7 @@ begin
       end if;
     end if;
   end process;
-  processing_27 : process
+  processing_27 : process (all)
   begin
     if (go_fmt(5)) then
       go_data <= ram_rdata;
@@ -1527,7 +1532,7 @@ begin
       end if;
     end if;
   end process;
-  processing_35 : process
+  processing_35 : process (all)
   begin
     if (cmd(0)) then
       ldm_sel <= X"0";
@@ -1920,7 +1925,7 @@ begin
       end if;
     end if;
   end process;
-  processing_54 : process
+  processing_54 : process (all)
   begin
     if (cmd_is_ldr0 or cmd_is_ldr1 or cmd_is_swp or cmd_is_swpx) then
       -- ram_flag <= ('1' sll cmd_addr(1 downto 0)) when cmd(22) else 
@@ -1937,7 +1942,7 @@ begin
       ram_flag <= "1111";
     end if;
   end process;
-  processing_55 : process (cmd, cmd_is_ldm)
+  processing_55 : process (all)
   begin
     if (cmd_is_ldm) then
       if (cmd(0)) then
@@ -2078,7 +2083,7 @@ begin
       end if;
     end if;
   end process;
-  processing_60 : process (cpsr_m, rd)
+  processing_60 : process (all)
   begin
     case ((cpsr_m)) is
     when "10001" =>
@@ -2224,7 +2229,7 @@ begin
     end if;
   end process;
 
-  processing_67 : process (cpsr_m)
+  processing_67 : process (all)
   begin
     case ((cpsr_m)) is
     when "10001" =>
@@ -2427,19 +2432,19 @@ begin
     elsif (rising_edge(clk)) then
       if (cpu_en) then
         if (cpu_restart) then
-          rf <= X"ffff_0000";
+          rf <= X"0000_0000";
         elsif (fiq_en) then
-          rf <= X"ffff_001c";
+          rf <= X"0000_001c";
         elsif (ram_abort) then
-          rf <= X"ffff_0010";
+          rf <= X"0000_0010";
         elsif (irq_en) then
-          rf <= X"ffff_0018";
+          rf <= X"0000_0018";
         elsif (cmd_flag and code_abort) then
-          rf <= X"ffff_000c";
+          rf <= X"0000_000c";
         elsif (cmd_flag and code_und) then
-          rf <= X"ffff_0004";
+          rf <= X"0000_0004";
         elsif (cmd_flag and cond_satisfy and cmd_is_swi) then
-          rf <= X"ffff_0008";
+          rf <= X"0000_0008";
         elsif (ldm_vld = '1' and (ldm_num = X"f")) then
           rf <= ldm_data;
         elsif (go_vld = '1' and (go_num = X"f")) then
@@ -2476,7 +2481,7 @@ begin
       end if;
     end if;
   end process;
-  processing_77 : process
+  processing_77 : process (all)
   begin
     if (cmd_is_bx or (cmd_is_multlx and not cmd(21))) then
       rn <= 32x"0";
@@ -2521,48 +2526,49 @@ begin
       end if;
     end if;
   end process;
-  processing_79 : process
+
+  processing_79 : process (all)
   begin
     case ((cmd(15 downto 12))) is
-    when X"0" =>
-      rna <= r0;
-    when X"1" =>
-      rna <= r1;
-    when X"2" =>
-      rna <= r2;
-    when X"3" =>
-      rna <= r3;
-    when X"4" =>
-      rna <= r4;
-    when X"5" =>
-      rna <= r5;
-    when X"6" =>
-      rna <= r6;
-    when X"7" =>
-      rna <= r7;
-    when X"8" =>
-      rna <= r8;
-    when X"9" =>
-      rna <= r9;
-    when X"a" =>
-      rna <= ra;
-    when X"b" =>
-      rna <= rb;
-    when X"c" =>
-      rna <= rc;
-    when X"d" =>
-      rna <= rd;
-    when X"e" =>
-      rna <= re;
-    when X"f" =>
-      rna <= rf;
-    when others =>
-      rna <= (others => '0');
+      when X"0" =>
+        rna <= r0;
+      when X"1" =>
+        rna <= r1;
+      when X"2" =>
+        rna <= r2;
+      when X"3" =>
+        rna <= r3;
+      when X"4" =>
+        rna <= r4;
+      when X"5" =>
+        rna <= r5;
+      when X"6" =>
+        rna <= r6;
+      when X"7" =>
+        rna <= r7;
+      when X"8" =>
+        rna <= r8;
+      when X"9" =>
+        rna <= r9;
+      when X"a" =>
+        rna <= ra;
+      when X"b" =>
+        rna <= rb;
+      when X"c" =>
+        rna <= rc;
+      when X"d" =>
+        rna <= rd;
+      when X"e" =>
+        rna <= re;
+      when X"f" =>
+        rna <= rf;
+      when others =>
+        rna <= (others => '0');
     end case;
   end process;
 
 
-  processing_80 : process
+  processing_80 : process (all)
   begin
     case ((cmd(19 downto 16))) is
     when X"0" =>
@@ -2620,7 +2626,7 @@ begin
       end if;
     end if;
   end process;
-  processing_82 : process
+  processing_82 : process (all)
   begin
     if (cmd_is_dp0 or cmd_is_ldr1) then
       case ((cmd(6 downto 5))) is
@@ -2665,7 +2671,7 @@ begin
       sec_operand <= reg_ans(31 downto 0);
     end if;
   end process;
-  processing_83 : process
+  processing_83 : process (all)
   begin
     if (cpsr_m = "10011") then
       spsr <= spsr_svc;
@@ -2812,11 +2818,11 @@ begin
     end if;
   end process;
 
-  processing_90 : process
+  processing_90 : process (all)
   begin
     if (cmd_is_mrs) then
-      to_data <= (spsr(10 downto 7) & 20b"0" & spsr(6 downto 5) & "0" & spsr(4 downto 0)) when cmd(22) else 
-                 (cpsr(10 downto 7) & 20b"0" & cpsr(6 downto 5) & "0" & cpsr(4 downto 0));
+      to_data <= (spsr(10 downto 7) & 20b"0" & spsr(6 downto 5) & '0' & spsr(4 downto 0)) when cmd(22) else 
+                 (cpsr(10 downto 7) & 20b"0" & cpsr(6 downto 5) & '0' & cpsr(4 downto 0));
     elsif (cmd_is_dp0 or cmd_is_dp1 or cmd_is_dp2) then
       to_data <= dp_ans;
     else
@@ -2824,7 +2830,7 @@ begin
     end if;
   end process;
 
-  processing_91 : process
+  processing_91 : process (all)
   begin
     if (cmd_is_mrs or (cmd_is_dp0 or cmd_is_dp1 or cmd_is_dp2) or cmd_is_multl) then
       to_num <= cmd(15 downto 12);
