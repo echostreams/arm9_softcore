@@ -246,7 +246,7 @@ int main (int argc, char **argv)
   {
     int n;
 #ifdef LPC2104
-    n = 2000;
+    n = 6000;
 #else
     scanf ("%d", &n);
 #endif

@@ -1,7 +1,7 @@
 NAME		= dhry
 TARGET		= dhry
 LD_RAMROM	= ROM
-PROGRAM_MK  	= true
+PROGRAM_MK  = true
 DEBUG		= 1
 # Optimization setting
 # (-Os for small code size, -O2 for speed)
@@ -28,13 +28,13 @@ SHELL           = bash --posix
 SIZE            = $(TOOLTARGET)-size
 STRIP           = $(TOOLTARGET)-strip
 
-CODE		= ARM
-TARGET_MODE	= arm
+CODE		    = ARM
+TARGET_MODE	    = arm
 
-CPU_VARIANT	= LPC2104
-#CPU		= arm926ej-s
-CPU		= arm7tdmi
-OPTS		= -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft
+CPU_VARIANT	    = LPC2104
+#CPU		    = arm926ej-s
+CPU		        = arm7tdmi
+OPTS		    = -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft -fno-common -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -MMD -MP
 
 #----------------------------------------------------------------------
 # COMPILER AND ASSEMBLER OPTIONS
@@ -46,9 +46,9 @@ W_OPTS    = -Wall -Wcast-align -Wcast-qual -Wimplicit \
                         -Werror -Wextra -pedantic
 
 LD_SCRIPT	= link_16k_128k_rom.ld
-LD_FLAGS	= -Wl,--gc-sections -lnosys -nostartfiles
-LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
-			-Wl,-Map=$(NAME).map,--cref #-u _printf_float
+LD_FLAGS	= -Wl,--gc-sections #-nostdlib -lnosys -nostartfiles -nostdlib
+LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -T $(LD_SCRIPT) -o $(NAME).elf \
+			-Wl,-Map=$(NAME).map,--cref -specs=nosys.specs -u _printf_float -u _scan_float
 
 CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -D MSC_CLOCK #-flto -ffunction-sections -fdata-sections -fno-builtin
 CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS) #$(W_OPTS)
@@ -67,11 +67,16 @@ all: $(TARGET) codesize
 	$(AS) -c $(CC_OPTS_A) -o $@ $<
 
 clean:
-	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst) $(NAME).elf
+	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst) $(NAME).elf hello.elf hello.bin
 
 $(TARGET): $(OBJS) $(LIBS)
-	$(LD) $(OBJS) $(LIBS) $(INC) $(LD_OPTS)
+	$(LD) $(OBJS) $(LIBS) $(INC) $(LD_OPTS) $(LD_FLAGS)
 	$(OBJCOPY) -O binary $(NAME).elf $(TARGET)
+
+hello:
+	$(CC) -c $(CC_OPTS) hello.c
+	$(LD) hello.o startup.o reloc.o framework.o stack.o $(LIBS) $(INC) $(LD_OPTS) -o hello.elf
+	$(OBJCOPY) -O binary hello.elf hello.bin
 
 codesize: $(TARGET)
 	@echo ""

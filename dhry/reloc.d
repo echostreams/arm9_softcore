@@ -1,0 +1,1 @@
+reloc.o: reloc.c

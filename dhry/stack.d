@@ -1,0 +1,1 @@
+stack.o: stack.c
