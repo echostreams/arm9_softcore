@@ -15,14 +15,14 @@ always clk = #500 ~clk; //1MHz
 reg rst = 1'b1;
 initial #1000 rst = 1'b0;
 
-reg [7:0] rom [32767:0];
+reg [7:0] rom [131072-1:0];
 integer i;
 reg [1023:0] filename;
 integer dummy;
 
 integer fd,fx;
 initial begin
-  for(i=0;i<32768;i=i+1)
+  for(i=0;i<131072;i=i+1)
       rom[i] = 0;
 
   filename = 0;
