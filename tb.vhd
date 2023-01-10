@@ -10,6 +10,13 @@ end tb;
 
 architecture RTL of tb is
 
+  function to_hexstr(slv : std_logic_vector) return string is
+    variable l : line;
+  begin
+    hwrite(l, slv);
+    return l.all;
+  end function to_hexstr;
+
   component arm9_compatiable_code
   port (
     clk : in std_logic;
@@ -75,6 +82,9 @@ architecture RTL of tb is
   signal irq : std_logic;
 
   signal timer_cnt : integer := 0;
+
+  signal stop_condition : std_logic := '0';
+
 begin
 
   read_bf: process is
@@ -111,19 +121,30 @@ begin
     wait for clk_period/2;
   end process;
 
+  stop_proc : process
+  begin
+    wait until stop_condition;
+    wait for (10 * clk_period);
+    report "STOP SIMULATION";
+    std.env.finish;
+    wait;
+  end process;
+
   rst <= '1', '0' after (10 * clk_period);
   
   processing_2 : process (clk)
   begin
     if (rising_edge(clk)) then
-      if (rom_en) then
+      if (rom_en = '1' and rom_addr <= x"1fffc") then
         rom_data <= (rom(to_integer(unsigned(rom_addr))+3) & 
                      rom(to_integer(unsigned(rom_addr))+2) & 
                      rom(to_integer(unsigned(rom_addr))+1) & 
                      rom(to_integer(unsigned(rom_addr))));
-      else
-
-        null;
+      else 
+	if (rom_addr > x"1fffc") then
+          report "ROM ADDR: " & to_hexstr(rom_addr);
+          stop_condition <= '1';
+        end if;
       end if;
     end if;
   end process;

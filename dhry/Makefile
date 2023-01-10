@@ -1,7 +1,7 @@
 NAME		= dhry
 TARGET		= dhry
 LD_RAMROM	= ROM
-PROGRAM_MK  = true
+PROGRAM_MK      = true
 DEBUG		= 1
 # Optimization setting
 # (-Os for small code size, -O2 for speed)
@@ -34,7 +34,7 @@ TARGET_MODE	    = arm
 CPU_VARIANT	    = LPC2104
 #CPU		    = arm926ej-s
 CPU		        = arm7tdmi
-OPTS		    = -mcpu=$(CPU) #-mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=softfp -fno-common #-fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -MMD -MP
+OPTS		    = -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft #-fno-common -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -MMD -MP
 
 #----------------------------------------------------------------------
 # COMPILER AND ASSEMBLER OPTIONS
