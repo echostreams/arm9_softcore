@@ -4,7 +4,7 @@ EXTERN(_startup)
 /* Memory Definitions */
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00008000
+  FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 0x00020000
   RAM   (rw) : ORIGIN = 0x40000000, LENGTH = 0x00004000
 }
 

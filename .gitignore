@@ -4,3 +4,6 @@ test.vcd
 a.out
 tb
 *.cf
+*.d
+*.vcd.hier
+
