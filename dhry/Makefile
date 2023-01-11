@@ -5,7 +5,7 @@ PROGRAM_MK      = true
 DEBUG		= 1
 # Optimization setting
 # (-Os for small code size, -O2 for speed)
-OFLAGS  	= -Os
+OFLAGS  	= -O2
 EFLAGS		=
 CSRCS		= dhry_1.c dhry_2.c reloc.c framework.c stack.c
 #CSRCS		= main.c reloc.c framework.c stack.c
@@ -33,8 +33,8 @@ TARGET_MODE	    = arm
 
 CPU_VARIANT	    = LPC2104
 #CPU		    = arm926ej-s
-CPU		        = arm7tdmi
-OPTS		    = -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft #-fno-common -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -MMD -MP
+CPU		    = arm7tdmi
+OPTS		    = -mcpu=$(CPU) #-mapcs-frame -mapcs-stack-check -msoft-float -mfloat-abi=soft -fno-common -fmessage-length=0 -fno-builtin -ffunction-sections -fdata-sections -MMD -MP
 
 #----------------------------------------------------------------------
 # COMPILER AND ASSEMBLER OPTIONS
@@ -42,8 +42,8 @@ OPTS		    = -mcpu=$(CPU) -mapcs-frame -mapcs-stack-check -msoft-float -mfloat-ab
 W_OPTS    = -Wall -Wcast-align -Wcast-qual -Wimplicit \
             -Wnested-externs -Wpointer-arith -Wswitch \
             -Wreturn-type \
-                        -Wformat -Wformat-security\
-                        -Werror -Wextra -pedantic
+            -Wformat -Wformat-security\
+            -Werror -Wextra -pedantic
 
 LD_SCRIPT	= link_16k_128k_rom.ld
 LD_FLAGS	= -Wl,--gc-sections -nostartfiles #-nostdlib -lnosys
@@ -67,15 +67,15 @@ all: $(TARGET) codesize
 	$(AS) -c $(CC_OPTS_A) -o $@ $<
 
 clean:
-	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst) $(NAME).elf hello.elf hello.bin
+	$(RM) $(TARGET).bin $(OBJS) $(OBJS:.o=.lst) $(NAME).elf hello.elf hello.bin
 
 $(TARGET): $(OBJS) $(LIBS)
 	$(LD) $(OBJS) $(LIBS) $(INC) $(LD_OPTS) $(LD_FLAGS)
-	$(OBJCOPY) -O binary $(NAME).elf $(TARGET)
+	$(OBJCOPY) -O binary $(NAME).elf $(TARGET).bin
 
 hello:
 	$(CC) -c $(CC_OPTS) hello.c
-	$(LD) hello.o startup.o reloc.o framework.o stack.o $(LIBS) $(INC) $(LD_OPTS) -o hello.elf
+	$(LD) hello.o startup.o reloc.o framework.o stack.o $(LIBS) $(INC) $(LD_OPTS) $(LD_FLAGS) -o hello.elf
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
 codesize: $(TARGET)

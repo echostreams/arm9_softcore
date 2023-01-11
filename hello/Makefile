@@ -4,7 +4,7 @@ LD_RAMROM	= ROM
 DEBUG		= 1
 # Optimization setting
 # (-Os for small code size, -O2 for speed)
-OFLAGS  	= -Os
+OFLAGS  	= -O2
 EFLAGS		=
 CSRCS		= main.c reloc.c framework.c stack.c
 
@@ -33,12 +33,12 @@ TARGET_MODE	= arm
 CPU_VARIANT	= LPC2104
 #CPU		= arm926ej-s
 CPU		= arm7tdmi
-OPTS		= -mcpu=$(CPU) -msoft-float -mfloat-abi=soft
+OPTS		= -mcpu=$(CPU) #-msoft-float -mfloat-abi=softfp
 LD_SCRIPT	= link_16k_128k_rom.ld
 LD_OPTS   	= $(OPTS) $(EFLAGS) -specs=nano.specs -specs=nosys.specs -T $(LD_SCRIPT) -o $(NAME).elf \
-			-Wl,-Map=$(NAME).map,--cref -Wl,--gc-sections -lnosys -nostartfiles -u _printf_float
+			-Wl,-Map=$(NAME).map,--cref -u _printf_float -u _scan_float #-Wl,--gc-section -nostartfiles -lnosys
 
-CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) -flto -ffunction-sections -fdata-sections -fno-builtin
+CA_OPTS		= $(OPTS) -D$(CPU_VARIANT) #-flto -ffunction-sections -fdata-sections -fno-builtin
 CC_OPTS		= $(CA_OPTS) $(OFLAGS) $(DBFLAGS)
 CC_OPTS_A	= $(CA_OPTS)
 
@@ -53,7 +53,7 @@ OBJS ?= $(CSRCS:.c=.o) $(ASRCS:.S=.o)
 	$(AS) -c $(CC_OPTS_A) -o $@ $<
 
 clean:
-	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst)
+	$(RM) $(TARGET) $(OBJS) $(OBJS:.o=.lst) $(TARGET).elf
 
 $(TARGET): $(OBJS) $(LIBS)
 	$(LD) $(OBJS) $(LIBS) $(INC) $(LD_OPTS)

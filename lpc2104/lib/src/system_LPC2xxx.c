@@ -170,7 +170,7 @@ void Default_IRQHandler(void) __attribute__ ((interrupt ("IRQ"))) __attribute__ 
 void Default_IRQHandler(void)
 {    
     SpuriousIRQCount++;
-
+    printf("IRQ Count: %d\n", SpuriousIRQCount);
     /* Acknowledge the IRQ */
     VIC_IRQDone();
 }

@@ -1,3 +1,8 @@
+-- ARM7: Von-Neumann architecture (single bus for data and instructions)
+--       3-stage pipeline (fetch/decode/execute)
+-- ARM9: Harvard architecture (separate bus for data and instructions)
+--       5-stage pipeline (fetch/decode/execute/memory/write)
+
 library ieee;
   use ieee.std_logic_1164.all;
   use ieee.numeric_std.all;
@@ -6,23 +11,26 @@ library ieee;
 entity arm9_compatiable_code is
   port (
     clk : in std_logic;
-    cpu_en : in std_logic;
-    cpu_restart : in std_logic;
-    fiq : in std_logic;
-    irq : in std_logic;
-    ram_abort : in std_logic;
-    ram_rdata : in std_logic_vector(31 downto 0);
-    rom_abort : in std_logic;
-    rom_data : in std_logic_vector(31 downto 0);
     rst : in std_logic;
 
-    ram_addr : out std_logic_vector(31 downto 0);
-    ram_cen : out std_logic;
-    ram_flag : out std_logic_vector(3 downto 0);
+    cpu_en      : in std_logic;
+    cpu_restart : in std_logic;
+
+    fiq : in std_logic;
+    irq : in std_logic;
+
+    ram_abort : in std_logic;
+    ram_cen   : out std_logic;
+    ram_flag  : out std_logic_vector(3 downto 0);
+    ram_addr  : out std_logic_vector(31 downto 0);
+    ram_rdata : in std_logic_vector(31 downto 0);    
     ram_wdata : out std_logic_vector(31 downto 0);
-    ram_wen : out std_logic;
-    rom_addr : out std_logic_vector(31 downto 0);
-    rom_en : out std_logic 
+    ram_wen   : out std_logic;
+
+    rom_abort : in std_logic;
+    rom_data  : in std_logic_vector(31 downto 0);
+    rom_addr  : out std_logic_vector(31 downto 0);
+    rom_en    : out std_logic
   );
 end arm9_compatiable_code;
 
@@ -292,11 +300,7 @@ architecture RTL of arm9_compatiable_code is
     return v;
   end function;
 
-
 begin
-  --*****************************************************/
-
-
 
   --*****************************************************/
   --wire statement area
@@ -474,11 +478,11 @@ begin
 
   ram_wen <= '0' when cmd_is_swp else not cmd(20);
 
-  rb <= rb_fiq
-  when (cpsr_m = "10001") else rb_usr;
+  rb <= rb_fiq when (cpsr_m = "10001") else
+        rb_usr;
 
-  rc <= rc_fiq
-  when (cpsr_m = "10001") else rc_usr;
+  rc <= rc_fiq when (cpsr_m = "10001") else
+        rc_usr;
 
   --rf_b <= std_logic_vector(to_unsigned(to_integer(signed(rf)) - 4, rf_b'length));
   rf_b <= rf - 4;
@@ -532,10 +536,10 @@ begin
     elsif (not cmd(23)) then
       add_b <= not sec_operand;
     else
-
       add_b <= sec_operand;
     end if;
   end process;
+
   processing_1 : process (all)
   begin
     if (cmd_is_mult or cmd_is_b or cmd_is_bx) then
@@ -563,6 +567,7 @@ begin
       add_c <= '0';
     end if;
   end process;
+
   processing_2 : process (all)
   begin
     if (code(27 downto 25) = "000") then
@@ -625,7 +630,6 @@ begin
     elsif (code(27 downto 25) = "111") then
       all_code <= code(24);
     else
-
       all_code <= '0';
     end if;
   end process;
@@ -693,11 +697,11 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
   end process;
+
   processing_6 : process (all)
   begin
     if (cmd_is_ldm) then
@@ -707,10 +711,10 @@ begin
     elsif (cmd(24)) then
       cmd_addr <= sum_rn_rm;
     else
-
       cmd_addr <= rn;
     end if;
   end process;
+
   processing_7 : process (clk, rst)
   begin
     if (rst) then
@@ -729,7 +733,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -746,7 +749,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -763,7 +765,6 @@ begin
           code_flag <= '1';
         end if;
       else
-
         null;
       end if;
     end if;
@@ -834,7 +835,8 @@ begin
       code_rma <= re;
     when X"f" =>
       code_rma <= std_logic_vector(to_unsigned(to_integer(unsigned(rf))+4, 32));
-    when others => code_rma <= (others => '0');
+    when others =>
+      code_rma <= (others => '0');
     end case;
   end process;
 
@@ -1304,7 +1306,7 @@ begin
               if (cmd(15 downto 12) = X"f") then
                 cpsr_z <= spsr(9);
               else
-                cpsr_z <= '1' when (dp_ans = 32x"00") else '0';
+                cpsr_z <= '1' when (dp_ans = 32x"0") else '0';
               end if;
             else
               null;

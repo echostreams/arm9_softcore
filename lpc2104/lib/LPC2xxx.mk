@@ -93,7 +93,7 @@ LPC2XXX_CXXFLAGS  += $(LPC2XXXLIB_FLAGS) $(LPC2XXX_MACHINE_FLAGS) $(LPC2XXX_INCL
 LPC2XXX_LIBS      += -L. -lLPC2xxx
 LPC2XXX_LDFLAGS   += $(LPC2XXX_MACHINE_FLAGS) -nostartfiles \
                     -T$(LPC2XXXLIB_DIR)/link_scripts/$(LPC2XXX_MODEL)-rom.ld \
-			-specs=nano.specs 
+			-specs=nano.specs
 LPC2XXX_ARFLAGS   := -rs
 
 # Set defaults for general compiler / linker flags (can be overriden on command

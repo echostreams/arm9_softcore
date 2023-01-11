@@ -172,7 +172,8 @@ PLL_Loop:       LDR     R3, [R0, #PLLSTAT_OFS]
 
 
 # Setup Stack for each mode
-                LDR     R0, =stackTop
+                //LDR     R0, =stackTop
+                LDR     R0, =_estack
 
 #  Enter Undefined Instruction Mode and set its Stack Pointer
                 MSR     CPSR_c, #Mode_UND|I_Bit|F_Bit

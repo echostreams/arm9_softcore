@@ -6,4 +6,5 @@ tb
 *.cf
 *.d
 *.vcd.hier
-
+work/
+*.elf
