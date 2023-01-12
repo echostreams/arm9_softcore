@@ -856,7 +856,8 @@ begin
       code_rot_num <= "00000";
     end if;
   end process;
-  processing_13 : process (all)
+  
+  processing_13 : process ( code_is_multl, code, code_rsa, code_is_mult, code_rot_num)
   begin
     if (code_is_multl) then
       if (code(22) and code_rsa(31)) then
