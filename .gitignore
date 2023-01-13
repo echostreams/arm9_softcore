@@ -8,3 +8,4 @@ tb
 *.vcd.hier
 work/
 *.elf
+svg/

@@ -484,18 +484,17 @@ begin
   rc <= rc_fiq when (cpsr_m = "10001") else
         rc_usr;
 
-  --rf_b <= std_logic_vector(to_unsigned(to_integer(signed(rf)) - 4, rf_b'length));
-  rf_b <= rf - 4;
+  rf_b <= std_logic_vector(unsigned(rf) - x"00000004");
+  --rf_b <= rf - 4;
 
   rom_addr <= rf;
 
   rom_en <= cpu_en and (not (int_all or to_rf_vld or cha_rf_vld or go_rf_vld or wait_en or hold_en));
-
-  --sum_middle <= std_logic_vector(to_unsigned(to_integer(unsigned(add_a(30 downto 0))) + 
-  --                                           to_integer(unsigned(add_b(30 downto 0))) + 
-  --                                           to_integer(unsigned'('0' & add_c)), 
-  --                                           32));
-  sum_middle <= resize(add_a(30 downto 0), 32) + add_b(30 downto 0) + add_c;
+  
+  -- sum_middle <= add_a(30 downto 0) + add_b(30 downto 0) + addc
+  sum_middle <= std_logic_vector(resize(unsigned(add_a(30 downto 0)), sum_middle'length) + 
+                                 resize(unsigned(add_b(30 downto 0)), sum_middle'length) + 
+                                 resize(unsigned'('0' & add_c), 32));
 
   sum_rn_rm <= (high_bit & sum_middle(30 downto 0));
 
@@ -772,7 +771,8 @@ begin
   processing_10 : process (all)
   begin
     if (code_is_ldrh1 or code_is_ldrsb1 or code_is_ldrsh1) then
-      code_rm <= resize(code(11 downto 8) & code(3 downto 0), code_rm'length);
+      --code_rm <= resize(code(11 downto 8) & code(3 downto 0), code_rm'length);
+      code_rm <= (7 downto 4 => code(11 downto 8), 3 downto 0 => code(3 downto 0), others => '0');
     elsif (code_is_b) then      
       -- code_rm <= (concatenate(6, code(23)) & code(23 downto 0) & '0');      
       code_rm <= code(23) & code(23) & code(23) & code(23) & code(23) & code(23) & code(23 downto 0) & "00";
@@ -845,13 +845,13 @@ begin
   begin
     if (code_is_dp0 or code_is_ldr1) then
       code_rot_num <= code(11 downto 7) when (code(6 downto 5) = "00") else 
-                      (not code(11 downto 7)) + 1;
+                      std_logic_vector(resize(unsigned(not code(11 downto 7)) + 1, code_rot_num'length));
     elsif (code_is_dp1) then
       code_rot_num <= code_rsa(4 downto 0) when (code(6 downto 5) = "00") else 
-                      (not code_rsa(4 downto 0)) + 1;
+                      std_logic_vector(resize(unsigned(not code_rsa(4 downto 0)) + 1, code_rot_num'length));
     elsif (code_is_msr1 or code_is_dp2) then
       -- code_rot_num <= std_logic_vector(to_unsigned(to_integer(unsigned(not code(11 downto 8)))+1, 4)) & '0';
-      code_rot_num <= ((not code(11 downto 8)) + 1) & '0';
+      code_rot_num <= std_logic_vector(unsigned(not code(11 downto 8)) + 1) & '0';
     else
       code_rot_num <= "00000";
     end if;
@@ -2205,7 +2205,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -2271,7 +2270,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -2300,7 +2298,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -2350,7 +2347,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -2375,7 +2371,6 @@ begin
           null;
         end if;
       else
-
         null;
       end if;
     end if;
@@ -2457,7 +2452,9 @@ begin
         elsif (cmd_ok and (cmd_is_b or cmd_is_bx)) then
           rf <= sum_rn_rm;
         elsif (not hold_en and not wait_en) then
-          rf <= std_logic_vector(to_unsigned(to_integer(unsigned(rf)) + 4, 32)); -- rf + 4;
+          --rf <= std_logic_vector(to_unsigned(to_integer(unsigned(rf)) + 4, 32)); -- rf + 4;
+          rf <= std_logic_vector(unsigned(rf) + x"00000004");
+          --rf <= rf + 4;
         else
           null;
         end if;
