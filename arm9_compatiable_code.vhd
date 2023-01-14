@@ -562,7 +562,6 @@ begin
     elsif (not cmd(23)) then
       add_c <= '1';
     else
-
       add_c <= '0';
     end if;
   end process;
