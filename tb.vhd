@@ -149,7 +149,7 @@ begin
                     rom(to_integer(unsigned(rom_addr))+1) &
                     rom(to_integer(unsigned(rom_addr)));
       else
-	      if (rom_addr > x"1fffc") then
+        if (rom_en = '1' and rom_addr > x"1fffc") then
           report "ROM ADDR: " & to_hexstr(rom_addr);
           stop_condition <= '1';
         end if;
@@ -210,7 +210,6 @@ begin
         else
           ram(to_integer(unsigned(ram_addr(27 downto 2))))(7 downto 0) <= ram(to_integer(unsigned(ram_addr(27 downto 2))))(7 downto 0);
         end if;
-
       else
         -- $display("write: %x: %x", ram_addr[27:2], {
         --   (ram_flag[3] ? ram_wdata[31:24]:ram[ram_addr[27:2]][31:24]),
@@ -218,7 +217,6 @@ begin
         --   (ram_flag[1] ? ram_wdata[15:8]:ram[ram_addr[27:2]][15:8]),
         --   (ram_flag[0] ? ram_wdata[7:0]:ram[ram_addr[27:2]][7:0])
         -- });
-
         null;
       end if;
     end if;
@@ -238,8 +236,12 @@ begin
         --write(OUTPUT, to_string(character'val(to_integer(unsigned(ram_wdata(7 downto 0))))));
         --print(to_string(character'val(to_integer(unsigned(ram_wdata(7 downto 0))))));
         write(OUTPUT, (1 => character'val(to_integer(unsigned(ram_wdata(7 downto 0))))));
+      elsif (ram_cen = '1' and ram_wen = '1' and ram_addr = x"e0000000") then
+        report "Status: " & integer'image(to_integer(unsigned(ram_wdata)));
+	if (to_integer(unsigned(ram_wdata)) /= 17) then
+          stop_condition <= '1';
+        end if;
       else
-
         null;
       end if;
     end if;
